@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "id": "blink",
+  "version": "${version}",
+  "name": "Blinking Stars",
+  "description": "",
+  "authors": [],
+  "contact": {
+    "repo": "https://github.com/migat/Blinking Stars"
+  },
+  "license": "MIT",
+  "icon": "assets/blink/icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "client": [
+      "net.migats21.blink.client.BlinkingStarsClient"
+    ],
+    "main": [
+      "net.migats21.blink.BlinkingStars"
+    ]
+  },
+  "mixins": [
+    "blink.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=0.14.19",
+    "fabric": "*",
+    "minecraft": "1.20"
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "key.blink.star": "Ster flikkeren",
+  "command.blink.curse.executed": "Zonnevloek uitgevoerd",
+  "command.blink.curse.broken": "Zonnevloek gebroken",
+  "command.blink.failed.no_entity": "De opdracht moet worden uitgevoerd door een entiteit",
+  "command.blink.failed.not_in_overworld": "De opdracht kan alleen in de overworld uitgevoerd worden",
+  "gamerule.cursedSkyDarken": "Monsters bij vervloekte duisternis",
+  "gamerule.fallingStarFrequency": "Frequentie van vallende sterren"
+}
