@@ -3,17 +3,19 @@ package net.migats21.blink.client;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.util.Mth;
 
 @Environment(EnvType.CLIENT)
 public class StarSweeper {
+    public static final Minecraft minecraft = Minecraft.getInstance();
     public final double x;
     public final double y;
     public final double z;
     public final double angle;
     public final double size;
-    private float time;
-    private static StarSweeper starSweeper;
+    private int time;
+    private volatile static StarSweeper starSweeper;
     public static StarSweeper getInstance() {
         return starSweeper;
     }
@@ -27,19 +29,20 @@ public class StarSweeper {
             this.z = z*d;
             this.size = size;
             this.angle = angle;
-            this.time = 0.0f;
+            this.time = 0;
         } else {
             this.x = this.y = this.z = this.size = this.angle = 0;
-            this.time = 10.1f;
+            this.time = 10;
         }
     }
 
     public static void fallingStar(float x, float y, float z, float size, double angle) {
         if (starSweeper == null) starSweeper = new StarSweeper(x, y, z, size, angle);
     }
+    @Deprecated(forRemoval = true)
     public static void progressTime() {
         if (starSweeper == null) return;
-        starSweeper.time += Minecraft.getInstance().getDeltaFrameTime();
+        starSweeper.time += minecraft.getDeltaFrameTime();
         if (starSweeper.time > 10.0f) starSweeper = null;
     }
 
@@ -49,10 +52,18 @@ public class StarSweeper {
     }
 
     public double getOffset() {
-        return (time-5.0)*20.0;
+        float frameTime = (float)time + minecraft.getFrameTime();
+        return (frameTime-5.0)*20.0;
     }
 
     public double getTailOffset() {
-        return (time*time*time-500)*0.2;
+        float frameTime = (float)time + minecraft.getFrameTime();
+        return (frameTime*frameTime*frameTime-500)*0.2;
+    }
+
+    public static void tick(ClientLevel level) {
+        if (starSweeper == null) return;
+        starSweeper.time++;
+        if (starSweeper.time >= 10) starSweeper = null;
     }
 }

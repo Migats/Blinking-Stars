@@ -7,6 +7,7 @@ import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.util.Mth;
 
 import java.util.ArrayList;
@@ -14,19 +15,20 @@ import java.util.List;
 
 @Environment(EnvType.CLIENT)
 public class StarBlinker {
-    private static List<StarBlinker> hardBlinkers;
+    public static final Minecraft minecraft = Minecraft.getInstance();
+    private static volatile List<StarBlinker> hardBlinkers;
     private static boolean isServerAllowed = false;
-    private double x, y, z, w;
-    private int id = -1;
+    private final double x, y, z;
+    private int id = -1, ticks;
     private boolean hasBlinked;
     private static KeyMapping blinkKey;
-    public static float timePhase = 0.0f;
+    public static int timePhase = 0;
 
     public StarBlinker(double x, double y, double z) {
         this.x = x;
         this.y = y;
         this.z = z;
-        this.w = 20.0;
+        this.ticks = 0;
         this.hasBlinked = false;
     }
 
@@ -38,12 +40,12 @@ public class StarBlinker {
         for(StarBlinker starBlinker : hardBlinkers) {
             if (starBlinker.id == id) {
                 starBlinker.hasBlinked = true;
-                return starBlinker.w;
+                return 20.0f - (float)starBlinker.ticks - minecraft.getFrameTime();
             }
             if (starBlinker.id == -1 && !starBlinker.hasBlinked && starBlinker.isCloseEnough(x, y, z)) {
                 starBlinker.id = id;
                 starBlinker.hasBlinked = true;
-                return starBlinker.w;
+                return 20.0f - (float)starBlinker.ticks - minecraft.getFrameTime();
             }
         }
         return 0.0;
@@ -52,16 +54,16 @@ public class StarBlinker {
     private boolean isCloseEnough(double x, double y, double z) {
         return Math.abs(x - this.x) < 0.01 && Math.abs(y - this.y) < 0.01 && Math.abs(z - this.z) < 0.01;
     }
-
+    @Deprecated(forRemoval = true)
     public static void updateFrameTime() {
-        float deltaFrameTime = Minecraft.getInstance().getDeltaFrameTime();
+        float deltaFrameTime = minecraft.getDeltaFrameTime();
         timePhase += deltaFrameTime;
         if (timePhase >= 1000.0f) timePhase -= 1000.0f;
         for(StarBlinker starBlinker : hardBlinkers) {
             starBlinker.hasBlinked = false;
-            starBlinker.w -= deltaFrameTime;
+            starBlinker.ticks -= deltaFrameTime;
         }
-        hardBlinkers.removeIf(starBlinker -> starBlinker.w <= 0.0);
+        hardBlinkers.removeIf(starBlinker -> starBlinker.ticks <= 0.0);
     }
     public static void blink(Minecraft minecraft, double angleX, double angleY) {
         double angleZ = minecraft.level.getSunAngle(minecraft.getFrameTime());
@@ -93,10 +95,19 @@ public class StarBlinker {
         isServerAllowed = false;
     }
 
-    public static float getSoftBlink(float sb) {
-        if (sb > timePhase && sb < timePhase + 5.0f) {
-            return (5.0f + timePhase - sb)*0.1f;
+    public static float getSoftBlink(int sb) {
+        if (sb > timePhase && sb < timePhase + 5) {
+            return (5.0f + timePhase + minecraft.getFrameTime() - sb)*0.1f;
         }
         return 0.0f;
+    }
+
+    public static void tick(ClientLevel level) {
+        timePhase = (int)(level.getGameTime() % 1000);
+        for(StarBlinker starBlinker : hardBlinkers) {
+            starBlinker.hasBlinked = false;
+            starBlinker.ticks++;
+        }
+        hardBlinkers.removeIf(starBlinker -> starBlinker.ticks >= 20);
     }
 }

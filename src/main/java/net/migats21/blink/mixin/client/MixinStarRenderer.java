@@ -40,8 +40,9 @@ public abstract class MixinStarRenderer {
     @Inject(method = "renderSky", at = @At("HEAD"))
     private void renderBlinkingStar(PoseStack poseStack, Matrix4f matrix4f, float f, Camera camera, boolean bl, Runnable runnable, CallbackInfo ci) {
         ShaderInstance sh = RenderSystem.getShader();
-        StarBlinker.updateFrameTime();
-        StarSweeper.progressTime();
+        // Deprecated code
+        // StarBlinker.updateFrameTime();
+        // StarSweeper.progressTime();
         createStars();
         RenderSystem.setShader(() -> sh);
     }
@@ -76,10 +77,10 @@ public abstract class MixinStarRenderer {
             double f = randomSource.nextFloat() * 2.0f - 1.0f;
             double g = 0.1f + randomSource.nextFloat() * 0.1f;
             int ii = STAR_COLORS[Math.min(randomSource1.nextInt(16), 4)] | (randomSource1.nextInt(224) << 24);
-            float sb = randomSource1.nextFloat() * 1000.0f;
+            int sb = randomSource1.nextInt(1000);
             drawStar(bufferBuilder, randomSource, d, e, f, g, sb, ii, i);
         }
-        drawStar(bufferBuilder, null, -0.5, 0.0, 0.0, 0.25, 0.0f, 0xffffffff, 3000);
+        drawStar(bufferBuilder, null, -0.5, 0.0, 0.0, 0.25, 0, 0xffffffff, 3000);
         StarBlinker.popBlink();
         StarSweeper starSweeper = StarSweeper.getInstance();
         if (starSweeper != null) {
@@ -90,7 +91,7 @@ public abstract class MixinStarRenderer {
     }
 
     @Unique
-    private void drawStar(BufferBuilder bufferBuilder, RandomSource randomSource, double d, double e, double f, double g, float sb, int ii, int id) {
+    private void drawStar(BufferBuilder bufferBuilder, RandomSource randomSource, double d, double e, double f, double g, int sb, int ii, int id) {
         double h = d * d + e * e + f * f;
         if (h < 1.0 && h > 0.01) {
             h = 1.0 / Math.sqrt(h);
