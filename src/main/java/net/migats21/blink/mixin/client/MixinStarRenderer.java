@@ -33,10 +33,11 @@ import java.util.function.Supplier;
 public abstract class MixinStarRenderer {
     @Unique
     private static final ResourceLocation CURSED_SUN = new ResourceLocation(BlinkingStars.MODID, "textures/environment/sun.png");
-    @Shadow protected abstract void createStars();
-
     @Unique
     private static final int[] STAR_COLORS = {0xffffcc, 0xffccff, 0xffcccc, 0xccffcc, 0xffffff};
+
+    @Shadow protected abstract void createStars();
+
     @Inject(method = "renderSky", at = @At("HEAD"))
     private void renderBlinkingStar(PoseStack poseStack, Matrix4f matrix4f, float f, Camera camera, boolean bl, Runnable runnable, CallbackInfo ci) {
         ShaderInstance sh = RenderSystem.getShader();
@@ -46,25 +47,30 @@ public abstract class MixinStarRenderer {
         createStars();
         RenderSystem.setShader(() -> sh);
     }
+
     @ModifyArg(method = "renderSky", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/systems/RenderSystem;setShaderTexture(ILnet/minecraft/resources/ResourceLocation;)V", ordinal = 0), index = 1)
     private ResourceLocation changeSunLocation(ResourceLocation normalSun) {
         if (BlinkingStarsClient.cursed) return CURSED_SUN;
         return normalSun;
     }
+
     @ModifyArgs(method = "renderSky", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/systems/RenderSystem;setShaderColor(FFFF)V", ordinal = 3))
     private void changeShaderColor(Args args) {
         args.set(0, 1.0f);
         args.set(1, 1.0f);
         args.set(2, 1.0f);
     }
+
     @ModifyArg(method = "renderSky", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/vertex/VertexBuffer;drawWithShader(Lorg/joml/Matrix4f;Lorg/joml/Matrix4f;Lnet/minecraft/client/renderer/ShaderInstance;)V", ordinal = 1), index = 2)
     private ShaderInstance changeRenderShader(ShaderInstance posShader) {
         return GameRenderer.getPositionColorShader();
     }
+
     @ModifyArg(method = "createStars", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/systems/RenderSystem;setShader(Ljava/util/function/Supplier;)V"), index = 0)
     private Supplier<ShaderInstance> changeWriterShader(Supplier<ShaderInstance> posShader) {
         return GameRenderer::getPositionColorShader;
     }
+
     @Inject(method = "drawStars", at = @At("HEAD"), cancellable = true)
     private void drawStars(BufferBuilder bufferBuilder, CallbackInfoReturnable<BufferBuilder.RenderedBuffer> cir) {
         RandomSource randomSource = RandomSource.create(10842L);

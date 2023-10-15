@@ -5,26 +5,29 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
+import net.migats21.blink.network.ServerboundStarBlinkPacket;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.util.Mth;
 
 import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 @Environment(EnvType.CLIENT)
 public class StarBlinker {
     public static final Minecraft minecraft = Minecraft.getInstance();
-    private static volatile List<StarBlinker> hardBlinkers;
-    private static boolean isServerAllowed = false;
+    private static volatile Set<StarBlinker> hardBlinkers;
     private final double x, y, z;
     private int id = -1, ticks;
     private boolean hasBlinked;
     private static KeyMapping blinkKey;
     public static int timePhase = 0;
+    private double sensitivity = 0.01;
 
-    public StarBlinker(double x, double y, double z) {
+    public StarBlinker(byte s, double x, double y, double z) {
+        sensitivity = (double)s * 0.001;
         this.x = x;
         this.y = y;
         this.z = z;
@@ -52,47 +55,33 @@ public class StarBlinker {
     }
 
     private boolean isCloseEnough(double x, double y, double z) {
-        return Math.abs(x - this.x) < 0.01 && Math.abs(y - this.y) < 0.01 && Math.abs(z - this.z) < 0.01;
+        return Math.abs(x - this.x) < sensitivity && Math.abs(y - this.y) < 0.01 && Math.abs(z - this.z) < 0.01;
     }
-    @Deprecated(forRemoval = true)
-    public static void updateFrameTime() {
-        float deltaFrameTime = minecraft.getDeltaFrameTime();
-        timePhase += deltaFrameTime;
-        if (timePhase >= 1000.0f) timePhase -= 1000.0f;
-        for(StarBlinker starBlinker : hardBlinkers) {
-            starBlinker.hasBlinked = false;
-            starBlinker.ticks -= deltaFrameTime;
-        }
-        hardBlinkers.removeIf(starBlinker -> starBlinker.ticks <= 0.0);
-    }
-    public static void blink(Minecraft minecraft, double angleX, double angleY) {
+
+    public static void blink(Minecraft minecraft, byte s, double angleX, double angleY) {
         double angleZ = minecraft.level.getSunAngle(minecraft.getFrameTime());
         double x = Math.cos(angleX) * Math.cos(angleY);
         double y = -Math.sin(angleX);
         double z = Math.cos(angleX) * Math.sin(angleY);
-        hardBlinkers.add(new StarBlinker(x, y * Math.cos(angleZ) + z * Math.sin(angleZ), y * -Math.sin(angleZ) + z * Math.cos(angleZ)));
+        hardBlinkers.add(new StarBlinker(s, x, y * Math.cos(angleZ) + z * Math.sin(angleZ), y * -Math.sin(angleZ) + z * Math.cos(angleZ)));
     }
+
     public static void init() {
-        hardBlinkers = new ArrayList<>();
+        hardBlinkers = new HashSet<>();
         ClientTickEvents.START_CLIENT_TICK.register((minecraft) -> {
-            if (blinkKey.consumeClick() && minecraft.level.dimensionType().hasSkyLight()) {
-                if (isServerAllowed) {
-                    minecraft.player.connection.sendCommand("blink");
-                } else {
-                    blink(minecraft, minecraft.getCameraEntity().getXRot() * Mth.DEG_TO_RAD, minecraft.getCameraEntity().getYRot() * Mth.DEG_TO_RAD);
-                }
-            }
+            if (!blinkKey.consumeClick() || !minecraft.level.dimensionType().hasSkyLight()) return;
+            float angleX = minecraft.getCameraEntity().getXRot() * Mth.DEG_TO_RAD;
+            float angleY = minecraft.getCameraEntity().getYRot() * Mth.DEG_TO_RAD;
+            blink(minecraft, (byte)16, angleX, angleY);
+            if (!BlinkingStarsClient.isOnServer) return;
+            ServerboundStarBlinkPacket packet = new ServerboundStarBlinkPacket(angleX, angleY, (byte) 16);
+            minecraft.getConnection().send(packet.asPayload());
         });
         blinkKey = KeyBindingHelper.registerKeyBinding(new KeyMapping("key.blink.star", InputConstants.Type.KEYSYM, -1, "key.categories.misc"));
     }
 
-    public static void isServerAllowed() {
-        isServerAllowed = true;
-    }
-
     public static void reset() {
         hardBlinkers.clear();
-        isServerAllowed = false;
     }
 
     public static float getSoftBlink(int sb) {

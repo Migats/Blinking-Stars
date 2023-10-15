@@ -1,12 +1,10 @@
 package net.migats21.blink.mixin;
 
-import net.fabricmc.api.EnvType;
 import net.migats21.blink.client.BlinkingStarsClient;
 import net.migats21.blink.common.ModGameRules;
 import net.migats21.blink.common.ServerSavedData;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Mth;
-import net.minecraft.util.profiling.jfr.Environment;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;

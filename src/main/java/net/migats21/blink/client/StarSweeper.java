@@ -16,6 +16,7 @@ public class StarSweeper {
     public final double size;
     private int time;
     private volatile static StarSweeper starSweeper;
+
     public static StarSweeper getInstance() {
         return starSweeper;
     }
@@ -38,12 +39,6 @@ public class StarSweeper {
 
     public static void fallingStar(float x, float y, float z, float size, double angle) {
         if (starSweeper == null) starSweeper = new StarSweeper(x, y, z, size, angle);
-    }
-    @Deprecated(forRemoval = true)
-    public static void progressTime() {
-        if (starSweeper == null) return;
-        starSweeper.time += minecraft.getDeltaFrameTime();
-        if (starSweeper.time > 10.0f) starSweeper = null;
     }
 
     public int getColor() {

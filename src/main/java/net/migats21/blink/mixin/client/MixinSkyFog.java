@@ -1,7 +1,6 @@
 package net.migats21.blink.mixin.client;
 
 import net.migats21.blink.client.BlinkingStarsClient;
-import net.migats21.blink.common.ServerSavedData;
 import net.minecraft.client.renderer.FogRenderer;
 import net.minecraft.util.Mth;
 import org.spongepowered.asm.mixin.Mixin;

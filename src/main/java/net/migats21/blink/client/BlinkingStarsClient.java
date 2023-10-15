@@ -6,19 +6,19 @@ import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.migats21.blink.network.PacketHandler;
 
 public class BlinkingStarsClient implements ClientModInitializer {
-    /**
-     * Runs the mod initializer on the client environment.
-     */
+    public static boolean cursed = false;
+    public static boolean isOnServer = false;
+
     @Override
     public void onInitializeClient() {
-        PacketHandler.register();
+        PacketHandler.registerClient();
         StarBlinker.init();
         ClientPlayConnectionEvents.DISCONNECT.register((listener, minecraft) -> {
             StarBlinker.reset();
             cursed = false;
+            isOnServer = false;
         });
         ClientTickEvents.START_WORLD_TICK.register(StarBlinker::tick);
         ClientTickEvents.START_WORLD_TICK.register(StarSweeper::tick);
     }
-    public static boolean cursed = false;
 }
