@@ -5,7 +5,7 @@
   "commands.blink.failed.no_entity": "This command needs to be run by entity",
   "commands.blink.failed.not_in_overworld": "This command can only be run in the overworld",
   "gamerule.cursedSkyDarken": "Monsters on cursed sky darken",
-  "gamerule.fallingStarFrequency": "Falling stars frequency",
+  "gamerule.fallingStarInterval": "Falling stars frequency",
   "options.blink": "Blinking Stars Options",
   "options.blink.animate": "Animate Stars",
   "options.blink.enabled": "Allow Blinking Stars",

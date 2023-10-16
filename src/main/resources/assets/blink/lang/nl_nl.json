@@ -1,9 +1,19 @@
 {
   "key.blink.star": "Ster flikkeren",
-  "command.blink.curse.executed": "Zonnevloek uitgevoerd",
-  "command.blink.curse.broken": "Zonnevloek gebroken",
-  "command.blink.failed.no_entity": "De opdracht moet worden uitgevoerd door een entiteit",
-  "command.blink.failed.not_in_overworld": "De opdracht kan alleen in de overworld uitgevoerd worden",
   "gamerule.cursedSkyDarken": "Monsters bij vervloekte duisternis",
-  "gamerule.fallingStarFrequency": "Frequentie van vallende sterren"
+  "gamerule.fallingStarInterval": "Interval van vallende sterren",
+  "commands.blink.curse.executed": "Zonnevloek uitgevoerd",
+  "commands.blink.curse.broken": "Zonnevloek gebroken",
+  "commands.blink.failed.no_entity": "De opdracht moet worden uitgevoerd door een entiteit",
+  "commands.blink.failed.not_in_overworld": "De opdracht kan alleen in de overworld uitgevoerd worden",
+  "options.blink": "Blinking Stars Opties",
+  "options.blink.animate": "Sterren Animeren",
+  "options.blink.enabled": "Flikkerende Sterren Toestaan",
+  "options.blink.enabled.description": "Indien uitgeschakeld, zullen sterren alleen flikkeren als je het zelf doet",
+  "options.blink.colors": "Gekleurde sterren",
+  "options.blink.fallingstars": "Vallende Sterren Toestaan",
+  "options.blink.sensitivity": "Flikker Gevoeligheid",
+  "options.blink.solarcurse.skydarken": "Vervloekte Lucht",
+  "options.blink.solarcurse.suncolor": "Vervloekte Zonkleur",
+  "options.blink.variety": "Gevarieerde Sterren"
 }

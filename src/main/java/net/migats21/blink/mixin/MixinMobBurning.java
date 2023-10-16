@@ -12,13 +12,13 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-@Mixin({Mob.class})
+@Mixin(Mob.class)
 public abstract class MixinMobBurning extends LivingEntity {
     protected MixinMobBurning(EntityType<? extends LivingEntity> entityType, Level level) {
         super(entityType, level);
     }
 
-    @Inject(method = {"isSunBurnTick"}, at = @At("HEAD"), cancellable = true)
+    @Inject(method = "isSunBurnTick", at = @At("HEAD"), cancellable = true)
     public void canBurn(CallbackInfoReturnable<Boolean> cir) {
         if (this.level().isClientSide) return;
         if (this.level().getGameRules().getBoolean(ModGameRules.CURSED_SKY_DARKEN) && ServerSavedData.getSavedData((ServerLevel)this.level()).isCursed()) {
