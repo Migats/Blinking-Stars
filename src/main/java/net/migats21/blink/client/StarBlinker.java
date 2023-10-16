@@ -54,6 +54,10 @@ public class StarBlinker {
         return 0.0;
     }
 
+    public static boolean anyStars() {
+        return !hardBlinkers.isEmpty();
+    }
+
     private boolean isCloseEnough(double x, double y, double z) {
         return Math.abs(x - this.x) < sensitivity && Math.abs(y - this.y) < sensitivity && Math.abs(z - this.z) < sensitivity;
     }

@@ -7,7 +7,7 @@ import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.util.Mth;
 
 @Environment(EnvType.CLIENT)
-public class StarSweeper {
+public class FallingStar {
     public static final Minecraft minecraft = Minecraft.getInstance();
     public final double x;
     public final double y;
@@ -15,13 +15,13 @@ public class StarSweeper {
     public final double angle;
     public final double size;
     private int time;
-    private volatile static StarSweeper starSweeper;
+    private volatile static FallingStar fallingStar;
 
-    public static StarSweeper getInstance() {
-        return starSweeper;
+    public static FallingStar getInstance() {
+        return fallingStar;
     }
 
-    private StarSweeper(float x, float y, float z, float size, double angle) {
+    private FallingStar(float x, float y, float z, float size, double angle) {
         double d = x*x+y*y+z*z;
         if (d < 1.0 && d > 0.01) {
             d = 1.0 / Math.sqrt(d);
@@ -37,8 +37,8 @@ public class StarSweeper {
         }
     }
 
-    public static void fallingStar(float x, float y, float z, float size, double angle) {
-        if (starSweeper == null) starSweeper = new StarSweeper(x, y, z, size, angle);
+    public static void add(float x, float y, float z, float size, double angle) {
+        if (fallingStar == null) fallingStar = new FallingStar(x, y, z, size, angle);
     }
 
     public int getColor() {
@@ -57,8 +57,8 @@ public class StarSweeper {
     }
 
     public static void tick(ClientLevel level) {
-        if (starSweeper == null) return;
-        starSweeper.time++;
-        if (starSweeper.time >= 10) starSweeper = null;
+        if (fallingStar == null) return;
+        fallingStar.time++;
+        if (fallingStar.time >= 10) fallingStar = null;
     }
 }

@@ -4,7 +4,8 @@ import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.fabricmc.fabric.api.networking.v1.PacketSender;
 import net.fabricmc.fabric.impl.networking.payload.PacketByteBufPayload;
 import net.migats21.blink.BlinkingStars;
-import net.migats21.blink.client.StarSweeper;
+import net.migats21.blink.client.ConfigOptions;
+import net.migats21.blink.client.FallingStar;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.network.FriendlyByteBuf;
@@ -24,7 +25,9 @@ public class ClientboundFallingStarPacket implements ModPacket {
     }
 
     public static void handle(Minecraft minecraft, ClientPacketListener handler, FriendlyByteBuf buffer, PacketSender packetSender) {
-        StarSweeper.fallingStar(buffer.readFloat(), buffer.readFloat(), buffer.readFloat(), buffer.readFloat(), buffer.readDouble());
+        if (ConfigOptions.ALLOW_FALLING_STARS.get()) {
+            FallingStar.add(buffer.readFloat(), buffer.readFloat(), buffer.readFloat(), buffer.readFloat(), buffer.readDouble());
+        }
     }
 
     public void sendPayload(PacketSender sender) {

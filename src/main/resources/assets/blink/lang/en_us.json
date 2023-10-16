@@ -7,5 +7,13 @@
   "gamerule.cursedSkyDarken": "Monsters on cursed sky darken",
   "gamerule.fallingStarFrequency": "Falling stars frequency",
   "options.blink": "Blinking Stars Options",
-  "options.blink.sensitivity": "Blink Sensitivity"
+  "options.blink.animate": "Animate Stars",
+  "options.blink.enabled": "Allow Blinking Stars",
+  "options.blink.enabled.description": "If disabled, stars will only blink if you blink them yourself",
+  "options.blink.colors": "Colored Stars",
+  "options.blink.fallingstars": "Allow Falling Stars",
+  "options.blink.sensitivity": "Blink Sensitivity",
+  "options.blink.solarcurse.skydarken": "Cursed Sky Darken",
+  "options.blink.solarcurse.suncolor": "Cursed Sun Color",
+  "options.blink.variety": "Variate Stars"
 }

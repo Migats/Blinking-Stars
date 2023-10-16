@@ -4,6 +4,7 @@ import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.fabricmc.fabric.api.networking.v1.PacketSender;
 import net.fabricmc.fabric.impl.networking.payload.PacketByteBufPayload;
 import net.migats21.blink.BlinkingStars;
+import net.migats21.blink.client.ConfigOptions;
 import net.migats21.blink.client.StarBlinker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientPacketListener;
@@ -12,7 +13,6 @@ import net.minecraft.network.protocol.game.ServerGamePacketListener;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.util.Mth;
 
 public class BiStarBlinkPacket implements ModPacket {
     public static final ResourceLocation ID = new ResourceLocation(BlinkingStars.MODID, "star");
@@ -38,10 +38,12 @@ public class BiStarBlinkPacket implements ModPacket {
     }
 
     public static void handle(Minecraft minecraft, ClientPacketListener handler, FriendlyByteBuf buffer, PacketSender packetSender) {
-        byte s = buffer.readByte();
-        float x = buffer.readFloat() * Mth.DEG_TO_RAD;
-        float y = buffer.readFloat() * Mth.DEG_TO_RAD;
-        StarBlinker.blink(minecraft, (int)s & 255, x, y);
+        if (ConfigOptions.ALLOW_BLINK.get()) {
+            byte s = buffer.readByte();
+            float x = buffer.readFloat() * 0.017453292f;
+            float y = buffer.readFloat() * 0.017453292f;
+            StarBlinker.blink(minecraft, s & 255, x, y);
+        }
     }
 
     public void sendPayload(PacketSender sender) {

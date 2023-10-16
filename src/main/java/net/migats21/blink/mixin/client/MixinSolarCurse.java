@@ -11,7 +11,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 public class MixinSolarCurse {
     @Inject(method = "getSunriseColor(FF)[F", at = @At(value = "RETURN", ordinal = 0), cancellable = true)
     public void getSolarCurseColor(float f, float g, CallbackInfoReturnable<float[]> cir) {
-        if (BlinkingStarsClient.cursed) {
+        if (BlinkingStarsClient.cursed && BlinkingStarsClient.cursedSunColor) {
             float[] arr = cir.getReturnValue();
             arr[1] = arr[2];
             arr[2] = arr[0];

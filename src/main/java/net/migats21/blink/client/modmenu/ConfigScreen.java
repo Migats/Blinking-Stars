@@ -15,11 +15,8 @@ import java.util.List;
 public class ConfigScreen extends SimpleOptionsSubScreen {
     private static final OptionInstance<?>[] optionList = initOptions();
 
-    private final Screen previousScreen;
-
     protected ConfigScreen(Screen screen) {
         super(screen, Minecraft.getInstance().options, Component.translatable("options.blink"), optionList);
-        previousScreen = screen;
     }
 
     private static OptionInstance<?>[] initOptions() {

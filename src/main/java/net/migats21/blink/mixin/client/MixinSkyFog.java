@@ -11,6 +11,6 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 public class MixinSkyFog {
     @Redirect(method = "setupColor", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/Mth;cos(F)F", ordinal = 0))
     private static float modifyFogDarkness(float f) {
-        return Mth.cos(f) - (BlinkingStarsClient.cursed ? 0.2f : 0.0f);
+        return Mth.cos(f) - (BlinkingStarsClient.cursed && BlinkingStarsClient.cursedSkyDarken ? 0.2f : 0.0f);
     }
 }
