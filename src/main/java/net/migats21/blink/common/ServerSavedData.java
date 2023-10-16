@@ -1,5 +1,7 @@
 package net.migats21.blink.common;
 
+import net.fabricmc.fabric.api.networking.v1.PacketSender;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.migats21.blink.network.ClientboundFallingStarPacket;
 import net.migats21.blink.network.ClientboundSolarCursePacket;
 import net.minecraft.nbt.CompoundTag;
@@ -8,6 +10,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.util.datafix.DataFixTypes;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.saveddata.SavedData;
 
 public class ServerSavedData extends SavedData {
@@ -17,6 +20,10 @@ public class ServerSavedData extends SavedData {
     public int nextFallingStar;
     public ServerLevel level;
 
+    public static void syncCurse(PacketSender sender, ServerLevel level) {
+        new ClientboundSolarCursePacket(getSavedData(level).isCursed()).sendPayload(sender);
+    }
+
     public boolean isCursed() {
         return cursed;
     }
@@ -24,7 +31,7 @@ public class ServerSavedData extends SavedData {
     public void setCursed(boolean b) {
         cursed = b;
         ClientboundSolarCursePacket packet = new ClientboundSolarCursePacket(cursed);
-        level.players().forEach((player) -> player.connection.send(packet.asPayload()));
+        level.players().forEach((player) -> packet.sendPayload(ServerPlayNetworking.getSender(player)));
     }
 
     @Override
@@ -57,7 +64,7 @@ public class ServerSavedData extends SavedData {
             rerollFallingStars();
             ClientboundFallingStarPacket fallingStarPacket = new ClientboundFallingStarPacket(RANDOM.nextFloat() * 2.0f - 1.0f, RANDOM.nextFloat() * 2.0f - 1.0f, RANDOM.nextFloat() * 2.0f - 1.0f, 0.1f + RANDOM.nextFloat() * 0.1f, RANDOM.nextDouble() * Mth.PI * 2.0);
             for (ServerPlayer player : level.players()) {
-                player.connection.send(fallingStarPacket.asPayload());
+                fallingStarPacket.sendPayload(ServerPlayNetworking.getSender(player));
             }
         }
     }

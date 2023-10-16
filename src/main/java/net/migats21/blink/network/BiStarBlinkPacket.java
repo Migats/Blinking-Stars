@@ -8,15 +8,13 @@ import net.migats21.blink.client.StarBlinker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.PacketListener;
-import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ServerGamePacketListener;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Mth;
 
-public class BiStarBlinkPacket {
+public class BiStarBlinkPacket implements ModPacket {
     public static final ResourceLocation ID = new ResourceLocation(BlinkingStars.MODID, "star");
     private final float x, y;
     private final byte s;
@@ -27,7 +25,6 @@ public class BiStarBlinkPacket {
         this.y = y;
     }
 
-    // TODO: Make the sensitivity configurable
     public BiStarBlinkPacket(byte s, float x, float y) {
         this.s = s;
         this.x = x;
@@ -44,19 +41,14 @@ public class BiStarBlinkPacket {
         byte s = buffer.readByte();
         float x = buffer.readFloat() * Mth.DEG_TO_RAD;
         float y = buffer.readFloat() * Mth.DEG_TO_RAD;
-        StarBlinker.blink(minecraft, s, x, y);
+        StarBlinker.blink(minecraft, (int)s & 255, x, y);
     }
 
-    public <T extends PacketListener> Packet<T> asPayload(PayloadFactory<Packet<T>> factory) {
+    public void sendPayload(PacketSender sender) {
         FriendlyByteBuf buffer = PacketByteBufs.create();
         buffer.writeByte(s);
         buffer.writeFloat(x);
         buffer.writeFloat(y);
-
-        return factory.construct(new PacketByteBufPayload(ID, buffer));
-    }
-    @FunctionalInterface
-    public interface PayloadFactory<T extends Packet<?>> {
-        T construct(PacketByteBufPayload payload);
+        sender.sendPacket(new PacketByteBufPayload(ID, buffer));
     }
 }

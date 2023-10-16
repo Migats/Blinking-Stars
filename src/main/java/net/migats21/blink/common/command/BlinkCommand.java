@@ -2,6 +2,7 @@ package net.migats21.blink.common.command;
 
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.migats21.blink.network.BiStarBlinkPacket;
 import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
@@ -21,7 +22,7 @@ public class BlinkCommand {
             if (!source.getLevel().dimensionType().hasSkyLight()) throw NOT_IN_OVERWORLD.create();
             BiStarBlinkPacket packet = new BiStarBlinkPacket(source.getEntity().getXRot(), source.getEntity().getYRot());
             for (ServerPlayer player : source.getLevel().getPlayers(player -> true)) {
-                player.connection.send(packet.asPayload(ClientboundCustomPayloadPacket::new));
+                packet.sendPayload(ServerPlayNetworking.getSender(player));
             }
             return 1;
         }));

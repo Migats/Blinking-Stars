@@ -8,12 +8,9 @@ import net.migats21.blink.client.BlinkingStarsClient;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.protocol.Packet;
-import net.minecraft.network.protocol.common.ClientCommonPacketListener;
-import net.minecraft.network.protocol.common.ClientboundCustomPayloadPacket;
 import net.minecraft.resources.ResourceLocation;
 
-public class ClientboundSolarCursePacket {
+public class ClientboundSolarCursePacket implements ModPacket {
     public static final ResourceLocation ID = new ResourceLocation(BlinkingStars.MODID, "curse");
     private final boolean cursed;
 
@@ -26,9 +23,9 @@ public class ClientboundSolarCursePacket {
         BlinkingStarsClient.isOnServer = true;
     }
 
-    public Packet<ClientCommonPacketListener> asPayload() {
+    public void sendPayload(PacketSender sender) {
         FriendlyByteBuf friendlyByteBuf = PacketByteBufs.create();
         friendlyByteBuf.writeBoolean(cursed);
-        return new ClientboundCustomPayloadPacket(new PacketByteBufPayload(ID, friendlyByteBuf));
+        sender.sendPacket(new PacketByteBufPayload(ID, friendlyByteBuf));
     }
 }

@@ -17,6 +17,9 @@
     ],
     "main": [
       "net.migats21.blink.BlinkingStars"
+    ],
+    "modmenu": [
+      "net.migats21.blink.client.modmenu.ModMenuApiImpl"
     ]
   },
   "mixins": [

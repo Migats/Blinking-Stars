@@ -15,7 +15,6 @@ import net.migats21.blink.common.command.CurseCommand;
 import net.migats21.blink.network.ClientboundSolarCursePacket;
 import net.migats21.blink.network.PacketHandler;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.server.network.ServerPlayerConnection;
 import net.minecraft.world.InteractionResult;
 
 public class BlinkingStars implements ModInitializer {
@@ -25,8 +24,8 @@ public class BlinkingStars implements ModInitializer {
     public void onInitialize() {
         CommandRegistrationCallback.EVENT.register(BlinkCommand::register);
         CommandRegistrationCallback.EVENT.register(CurseCommand::register);
-        ServerPlayConnectionEvents.JOIN.register((listener, packetSender, server) ->
-            listener.send(new ClientboundSolarCursePacket(ServerSavedData.getSavedData(listener.player.serverLevel()).isCursed()).asPayload())
+        ServerPlayConnectionEvents.JOIN.register((listener, sender, server) ->
+            ServerSavedData.syncCurse(sender, listener.player.serverLevel())
         );
         ServerEntityWorldChangeEvents.AFTER_PLAYER_CHANGE_WORLD.register((player, level, level2) -> {
             ServerSavedData solarCurseData = ServerSavedData.getSavedData(level2);

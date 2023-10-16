@@ -8,12 +8,9 @@ import net.migats21.blink.client.StarSweeper;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.protocol.Packet;
-import net.minecraft.network.protocol.common.ClientCommonPacketListener;
-import net.minecraft.network.protocol.common.ClientboundCustomPayloadPacket;
 import net.minecraft.resources.ResourceLocation;
 
-public class ClientboundFallingStarPacket {
+public class ClientboundFallingStarPacket implements ModPacket {
     public static final ResourceLocation ID = new ResourceLocation(BlinkingStars.MODID, "falling");
     private final float x, y, z, size;
     private final double angle;
@@ -30,13 +27,13 @@ public class ClientboundFallingStarPacket {
         StarSweeper.fallingStar(buffer.readFloat(), buffer.readFloat(), buffer.readFloat(), buffer.readFloat(), buffer.readDouble());
     }
 
-    public Packet<ClientCommonPacketListener> asPayload() {
+    public void sendPayload(PacketSender sender) {
         FriendlyByteBuf buffer = PacketByteBufs.create();
         buffer.writeFloat(x);
         buffer.writeFloat(y);
         buffer.writeFloat(z);
         buffer.writeFloat(size);
         buffer.writeDouble(angle);
-        return new ClientboundCustomPayloadPacket(new PacketByteBufPayload(ID, buffer));
+        sender.sendPacket(new PacketByteBufPayload(ID, buffer));
     }
 }

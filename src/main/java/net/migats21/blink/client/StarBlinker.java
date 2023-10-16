@@ -5,29 +5,29 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.migats21.blink.network.BiStarBlinkPacket;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.network.protocol.common.ServerboundCustomPayloadPacket;
 import net.minecraft.util.Mth;
+import org.apache.commons.compress.utils.Lists;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.List;
 
 @Environment(EnvType.CLIENT)
 public class StarBlinker {
     public static final Minecraft minecraft = Minecraft.getInstance();
-    private static volatile Set<StarBlinker> hardBlinkers;
+    private static volatile List<StarBlinker> hardBlinkers;
     private final double x, y, z;
     private int id = -1, ticks;
     private boolean hasBlinked;
     private static KeyMapping blinkKey;
     public static int timePhase = 0;
-    private double sensitivity = 0.01;
+    private final double sensitivity;
 
-    public StarBlinker(byte s, double x, double y, double z) {
-        sensitivity = (double)s * 0.001;
+    public StarBlinker(int s, double x, double y, double z) {
+        sensitivity = s * 0.001;
         this.x = x;
         this.y = y;
         this.z = z;
@@ -55,10 +55,10 @@ public class StarBlinker {
     }
 
     private boolean isCloseEnough(double x, double y, double z) {
-        return Math.abs(x - this.x) < sensitivity && Math.abs(y - this.y) < 0.01 && Math.abs(z - this.z) < 0.01;
+        return Math.abs(x - this.x) < sensitivity && Math.abs(y - this.y) < sensitivity && Math.abs(z - this.z) < sensitivity;
     }
 
-    public static void blink(Minecraft minecraft, byte s, double angleX, double angleY) {
+    public static void blink(Minecraft minecraft, int s, double angleX, double angleY) {
         double angleZ = minecraft.level.getSunAngle(minecraft.getFrameTime());
         double x = Math.cos(angleX) * Math.cos(angleY);
         double y = -Math.sin(angleX);
@@ -67,15 +67,16 @@ public class StarBlinker {
     }
 
     public static void init() {
-        hardBlinkers = new HashSet<>();
+        hardBlinkers = Lists.newArrayList();
         ClientTickEvents.START_CLIENT_TICK.register((minecraft) -> {
             if (!blinkKey.consumeClick() || !minecraft.level.dimensionType().hasSkyLight()) return;
             float angleX = minecraft.getCameraEntity().getXRot() * Mth.DEG_TO_RAD;
             float angleY = minecraft.getCameraEntity().getYRot() * Mth.DEG_TO_RAD;
-            blink(minecraft, (byte)16, angleX, angleY);
+            int blinkSensitivity = ConfigOptions.BLINK_SENSITIVITY.get();
+            blink(minecraft, blinkSensitivity, angleX, angleY);
             if (!BlinkingStarsClient.isOnServer) return;
-            BiStarBlinkPacket packet = new BiStarBlinkPacket((byte) 16, angleX, angleY);
-            minecraft.getConnection().send(packet.asPayload(ServerboundCustomPayloadPacket::new));
+            BiStarBlinkPacket packet = new BiStarBlinkPacket((byte)blinkSensitivity, angleX, angleY);
+            packet.sendPayload(ClientPlayNetworking.getSender());
         });
         blinkKey = KeyBindingHelper.registerKeyBinding(new KeyMapping("key.blink.star", InputConstants.Type.KEYSYM, -1, "key.categories.misc"));
     }
