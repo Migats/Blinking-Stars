@@ -8,28 +8,36 @@ import net.migats21.blink.client.StarBlinker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.PacketListener;
 import net.minecraft.network.protocol.Packet;
-import net.minecraft.network.protocol.common.ClientCommonPacketListener;
-import net.minecraft.network.protocol.common.ClientboundCustomPayloadPacket;
+import net.minecraft.network.protocol.game.ServerGamePacketListener;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Mth;
 
-public class ClientboundStarBlinkPacket {
+public class BiStarBlinkPacket {
     public static final ResourceLocation ID = new ResourceLocation(BlinkingStars.MODID, "star");
     private final float x, y;
-    private byte s;
+    private final byte s;
 
-    public ClientboundStarBlinkPacket(float x, float y) {
+    public BiStarBlinkPacket(float x, float y) {
+        this.s = 10;
         this.x = x;
         this.y = y;
-        this.s = 10;
     }
 
     // TODO: Make the sensitivity configurable
-    public ClientboundStarBlinkPacket(float x, float y, byte s) {
+    public BiStarBlinkPacket(byte s, float x, float y) {
+        this.s = s;
         this.x = x;
         this.y = y;
-        this.s = s;
+    }
+
+    public static void handle(MinecraftServer server, ServerPlayer player, ServerGamePacketListener listener, FriendlyByteBuf buffer, PacketSender sender) {
+        player.serverLevel().players().forEach((player1) -> {
+            if (player != player1) player1.connection.send(sender.createPacket(ID, buffer));
+        });
     }
 
     public static void handle(Minecraft minecraft, ClientPacketListener handler, FriendlyByteBuf buffer, PacketSender packetSender) {
@@ -38,11 +46,17 @@ public class ClientboundStarBlinkPacket {
         float y = buffer.readFloat() * Mth.DEG_TO_RAD;
         StarBlinker.blink(minecraft, s, x, y);
     }
-    public Packet<ClientCommonPacketListener> asPayload() {
+
+    public <T extends PacketListener> Packet<T> asPayload(PayloadFactory<Packet<T>> factory) {
         FriendlyByteBuf buffer = PacketByteBufs.create();
         buffer.writeByte(s);
         buffer.writeFloat(x);
         buffer.writeFloat(y);
-        return new ClientboundCustomPayloadPacket(new PacketByteBufPayload(ID, buffer));
+
+        return factory.construct(new PacketByteBufPayload(ID, buffer));
+    }
+    @FunctionalInterface
+    public interface PayloadFactory<T extends Packet<?>> {
+        T construct(PacketByteBufPayload payload);
     }
 }

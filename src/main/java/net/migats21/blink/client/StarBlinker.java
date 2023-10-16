@@ -5,13 +5,13 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
-import net.migats21.blink.network.ServerboundStarBlinkPacket;
+import net.migats21.blink.network.BiStarBlinkPacket;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.network.protocol.common.ServerboundCustomPayloadPacket;
 import net.minecraft.util.Mth;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -74,8 +74,8 @@ public class StarBlinker {
             float angleY = minecraft.getCameraEntity().getYRot() * Mth.DEG_TO_RAD;
             blink(minecraft, (byte)16, angleX, angleY);
             if (!BlinkingStarsClient.isOnServer) return;
-            ServerboundStarBlinkPacket packet = new ServerboundStarBlinkPacket(angleX, angleY, (byte) 16);
-            minecraft.getConnection().send(packet.asPayload());
+            BiStarBlinkPacket packet = new BiStarBlinkPacket((byte) 16, angleX, angleY);
+            minecraft.getConnection().send(packet.asPayload(ServerboundCustomPayloadPacket::new));
         });
         blinkKey = KeyBindingHelper.registerKeyBinding(new KeyMapping("key.blink.star", InputConstants.Type.KEYSYM, -1, "key.categories.misc"));
     }
