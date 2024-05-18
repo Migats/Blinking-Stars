@@ -1,5 +1,7 @@
 package net.migats21.blink.client.modmenu;
 
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.migats21.blink.client.BlinkingStarsClient;
 import net.migats21.blink.client.ConfigOptions;
 import net.minecraft.client.Minecraft;
@@ -12,6 +14,7 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 
+@Environment(EnvType.CLIENT)
 public class ConfigScreen extends SimpleOptionsSubScreen {
     private static final OptionInstance<?>[] optionList = initOptions();
 
@@ -31,5 +34,10 @@ public class ConfigScreen extends SimpleOptionsSubScreen {
             }
         }
         return list.toArray(OptionInstance[]::new);
+    }
+
+    @Override
+    public void removed() {
+        ConfigOptions.save();
     }
 }

@@ -1,5 +1,7 @@
 package net.migats21.blink.client;
 
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.fabricmc.loader.api.FabricLoader;
 import net.migats21.blink.BlinkingStars;
 import net.minecraft.client.OptionInstance;
@@ -12,6 +14,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Properties;
 
+@Environment(EnvType.CLIENT)
 public class ConfigOptions {
     public static final Properties CONFIG = new Properties();
     public static final OptionInstance<Boolean> ANIMATE_STARS = OptionInstance.createBoolean("options.blink.animate", true, (bl) -> {

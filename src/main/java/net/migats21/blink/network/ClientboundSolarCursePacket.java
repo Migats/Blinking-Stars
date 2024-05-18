@@ -2,7 +2,6 @@ package net.migats21.blink.network;
 
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.fabricmc.fabric.api.networking.v1.PacketSender;
-import net.fabricmc.fabric.impl.networking.payload.PacketByteBufPayload;
 import net.migats21.blink.BlinkingStars;
 import net.migats21.blink.client.BlinkingStarsClient;
 import net.minecraft.client.Minecraft;
@@ -26,6 +25,6 @@ public class ClientboundSolarCursePacket implements ModPacket {
     public void sendPayload(PacketSender sender) {
         FriendlyByteBuf friendlyByteBuf = PacketByteBufs.create();
         friendlyByteBuf.writeBoolean(cursed);
-        sender.sendPacket(new PacketByteBufPayload(ID, friendlyByteBuf));
+        sender.sendPacket(sender.createPacket(ID, friendlyByteBuf));
     }
 }

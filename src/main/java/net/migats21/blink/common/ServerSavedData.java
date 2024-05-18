@@ -10,7 +10,6 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.util.datafix.DataFixTypes;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.saveddata.SavedData;
 
 public class ServerSavedData extends SavedData {

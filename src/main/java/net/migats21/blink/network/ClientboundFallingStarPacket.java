@@ -2,7 +2,6 @@ package net.migats21.blink.network;
 
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.fabricmc.fabric.api.networking.v1.PacketSender;
-import net.fabricmc.fabric.impl.networking.payload.PacketByteBufPayload;
 import net.migats21.blink.BlinkingStars;
 import net.migats21.blink.client.ConfigOptions;
 import net.migats21.blink.client.FallingStar;
@@ -37,6 +36,6 @@ public class ClientboundFallingStarPacket implements ModPacket {
         buffer.writeFloat(z);
         buffer.writeFloat(size);
         buffer.writeDouble(angle);
-        sender.sendPacket(new PacketByteBufPayload(ID, buffer));
+        sender.sendPacket(sender.createPacket(ID, buffer));
     }
 }

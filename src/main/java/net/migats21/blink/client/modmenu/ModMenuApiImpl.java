@@ -3,11 +3,13 @@ package net.migats21.blink.client.modmenu;
 import com.google.common.collect.ImmutableMap;
 import com.terraformersmc.modmenu.api.ConfigScreenFactory;
 import com.terraformersmc.modmenu.api.ModMenuApi;
-import org.jetbrains.annotations.ApiStatus;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 
 import java.util.Map;
 import java.util.function.Consumer;
 
+@Environment(EnvType.CLIENT)
 public class ModMenuApiImpl implements ModMenuApi {
     @Override
     public ConfigScreenFactory<?> getModConfigScreenFactory() {

@@ -63,6 +63,9 @@ public class StarBlinker {
     }
 
     public static void blink(Minecraft minecraft, int s, double angleX, double angleY) {
+        angleX *= Mth.DEG_TO_RAD;
+        angleY *= Mth.DEG_TO_RAD;
+        // noinspection DataFlowIssue: Blink can only be called when a singleplayer server is running.
         double angleZ = minecraft.level.getSunAngle(minecraft.getFrameTime());
         double x = Math.cos(angleX) * Math.cos(angleY);
         double y = -Math.sin(angleX);
@@ -73,9 +76,11 @@ public class StarBlinker {
     public static void init() {
         hardBlinkers = Lists.newArrayList();
         ClientTickEvents.START_CLIENT_TICK.register((minecraft) -> {
+            // noinspection DataFlowIssue: consumeClick will only be true if a world is running
             if (!blinkKey.consumeClick() || !minecraft.level.dimensionType().hasSkyLight()) return;
-            float angleX = minecraft.getCameraEntity().getXRot() * Mth.DEG_TO_RAD;
-            float angleY = minecraft.getCameraEntity().getYRot() * Mth.DEG_TO_RAD;
+            // noinspection DataFlowIssue: The camera entity is always present when a world is running
+            float angleX = minecraft.getCameraEntity().getXRot();
+            float angleY = minecraft.getCameraEntity().getYRot();
             int blinkSensitivity = ConfigOptions.BLINK_SENSITIVITY.get();
             blink(minecraft, blinkSensitivity, angleX, angleY);
             if (!BlinkingStarsClient.isOnServer) return;

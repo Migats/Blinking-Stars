@@ -2,7 +2,6 @@ package net.migats21.blink.network;
 
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.fabricmc.fabric.api.networking.v1.PacketSender;
-import net.fabricmc.fabric.impl.networking.payload.PacketByteBufPayload;
 import net.migats21.blink.BlinkingStars;
 import net.migats21.blink.client.ConfigOptions;
 import net.migats21.blink.client.StarBlinker;
@@ -40,8 +39,8 @@ public class BiStarBlinkPacket implements ModPacket {
     public static void handle(Minecraft minecraft, ClientPacketListener handler, FriendlyByteBuf buffer, PacketSender packetSender) {
         if (ConfigOptions.ALLOW_BLINK.get()) {
             byte s = buffer.readByte();
-            float x = buffer.readFloat() * 0.017453292f;
-            float y = buffer.readFloat() * 0.017453292f;
+            float x = buffer.readFloat();
+            float y = buffer.readFloat();
             StarBlinker.blink(minecraft, s & 255, x, y);
         }
     }
@@ -51,6 +50,6 @@ public class BiStarBlinkPacket implements ModPacket {
         buffer.writeByte(s);
         buffer.writeFloat(x);
         buffer.writeFloat(y);
-        sender.sendPacket(new PacketByteBufPayload(ID, buffer));
+        sender.sendPacket(sender.createPacket(ID, buffer));
     }
 }
