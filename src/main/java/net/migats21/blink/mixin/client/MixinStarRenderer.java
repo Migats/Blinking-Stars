@@ -7,6 +7,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import net.migats21.blink.BlinkingStars;
 import net.migats21.blink.client.BlinkingStarsClient;
+import net.migats21.blink.client.ConfigOptions;
 import net.migats21.blink.client.StarBlinker;
 import net.migats21.blink.client.FallingStar;
 import net.minecraft.client.Camera;
@@ -41,29 +42,27 @@ public abstract class MixinStarRenderer {
     @Inject(method = "renderSky", at = @At("HEAD"))
     private void renderBlinkingStar(PoseStack poseStack, Matrix4f matrix4f, float f, Camera camera, boolean bl, Runnable runnable, CallbackInfo ci) {
         ShaderInstance shaderInstance;
-        if (!BlinkingStarsClient.animatedStars && !StarBlinker.anyStars() && FallingStar.getInstance() == null) {
-            if (BlinkingStarsClient.shouldUpdateStars) {
-                shaderInstance = RenderSystem.getShader();
-                this.createStars();
-                RenderSystem.setShader(() -> shaderInstance);
-                BlinkingStarsClient.shouldUpdateStars = false;
-            }
-        } else {
+        if (ConfigOptions.ANIMATE_STARS.get() || StarBlinker.anyStars() || FallingStar.getInstance() != null) {
             shaderInstance = RenderSystem.getShader();
             this.createStars();
             RenderSystem.setShader(() -> shaderInstance);
             BlinkingStarsClient.shouldUpdateStars = true;
+        } else if (BlinkingStarsClient.shouldUpdateStars) {
+            shaderInstance = RenderSystem.getShader();
+            this.createStars();
+            RenderSystem.setShader(() -> shaderInstance);
+            BlinkingStarsClient.shouldUpdateStars = false;
         }
     }
 
     @ModifyArg(method = "renderSky", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/systems/RenderSystem;setShaderTexture(ILnet/minecraft/resources/ResourceLocation;)V", ordinal = 0), index = 1)
     private ResourceLocation changeSunLocation(ResourceLocation normalSun) {
-        return BlinkingStarsClient.cursed && BlinkingStarsClient.cursedSunColor ? CURSED_SUN : normalSun;
+        return BlinkingStarsClient.cursed && ConfigOptions.CURSED_SUNCOLOR.get() ? CURSED_SUN : normalSun;
     }
 
     @ModifyArgs(method = "renderSky", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/systems/RenderSystem;setShaderColor(FFFF)V", ordinal = 3))
     private void changeShaderColor(Args args) {
-        if (BlinkingStarsClient.starVariety) {
+        if (ConfigOptions.STAR_VARIETY.get()) {
             args.set(0, 1.0f);
             args.set(1, 1.0f);
             args.set(2, 1.0f);
@@ -82,17 +81,18 @@ public abstract class MixinStarRenderer {
 
     @Inject(method = "drawStars", at = @At("HEAD"), cancellable = true)
     private void drawStars(BufferBuilder bufferBuilder, CallbackInfoReturnable<BufferBuilder.RenderedBuffer> cir) {
-        boolean coloredStars = BlinkingStarsClient.coloredStars;
-        boolean starVariety = BlinkingStarsClient.starVariety;
+        boolean coloredStars = ConfigOptions.COLORED_STARS.get();
+        boolean starVariety = ConfigOptions.STAR_VARIETY.get();
+        int density = ConfigOptions.STAR_DENSITY.get().getAsInt();
+        float size = ConfigOptions.STAR_SIZE.get().getAsFloat();
         RandomSource randomSource = RandomSource.create(10842L);
         RandomSource randomSource1 = RandomSource.create(44654L);
         bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
-
-        for(int i = 0; i < 3000; ++i) {
+        for(int i = 0; i < density; ++i) {
             double d = randomSource.nextFloat() * 2.0f - 1.0f;
             double e = randomSource.nextFloat() * 2.0f - 1.0f;
             double f = randomSource.nextFloat() * 2.0f - 1.0f;
-            double g = (starVariety ? 0.1f : 0.15f) + randomSource.nextFloat() * 0.1f;
+            double g = size + randomSource.nextFloat() * 0.1f;
             int ii = STAR_COLORS[coloredStars ? Math.min(randomSource1.nextInt(16), 4) : 4] | (starVariety ? randomSource1.nextInt(224) : 224) << 24;
             int sb = randomSource1.nextInt(1000);
             this.drawStar(bufferBuilder, randomSource, d, e, f, g, sb, ii, i);
@@ -140,7 +140,7 @@ public abstract class MixinStarRenderer {
             double t = Math.sin(s);
             double u = Math.cos(s);
             int ca = ii >>> 24;
-            if (BlinkingStarsClient.animatedStars) {
+            if (ConfigOptions.ANIMATE_STARS.get()) {
                 ca += (int)((255.0f - (float)ca) * Math.max((float)bs / 20.0f, StarBlinker.getSoftBlink(sb)));
                 ii = ii & 16777215 | ca << 24;
             }

@@ -19,6 +19,23 @@ public class ServerSavedData extends SavedData {
     public int nextFallingStar;
     public ServerLevel level;
 
+    private ServerSavedData(CompoundTag compoundTag) {
+        cursed = compoundTag.getBoolean("cursed");
+        nextFallingStar = compoundTag.getInt("nextFallingStar");
+    }
+
+    private ServerSavedData() {
+        cursed = false;
+        nextFallingStar = RANDOM.nextInt(6000);
+    }
+
+    public static ServerSavedData getSavedData(ServerLevel level) {
+        ServerSavedData savedData = level.getDataStorage().computeIfAbsent(FACTORY, "blink");
+        savedData.setDirty();
+        savedData.level = level;
+        return savedData;
+    }
+
     public static void syncCurse(PacketSender sender, ServerLevel level) {
         new ClientboundSolarCursePacket(getSavedData(level).isCursed()).sendPayload(sender);
     }
@@ -38,23 +55,6 @@ public class ServerSavedData extends SavedData {
         compoundTag.putBoolean("cursed", cursed);
         compoundTag.putInt("nextFallingStar", nextFallingStar);
         return compoundTag;
-    }
-
-    public ServerSavedData(CompoundTag compoundTag) {
-        cursed = compoundTag.getBoolean("cursed");
-        nextFallingStar = compoundTag.getInt("nextFallingStar");
-    }
-
-    public ServerSavedData() {
-        cursed = false;
-        nextFallingStar = RANDOM.nextInt(6000);
-    }
-
-    public static ServerSavedData getSavedData(ServerLevel level) {
-        ServerSavedData savedData = level.getDataStorage().computeIfAbsent(FACTORY, "blink");
-        savedData.setDirty();
-        savedData.level = level;
-        return savedData;
     }
 
     public void tick() {

@@ -1,6 +1,7 @@
 package net.migats21.blink.mixin.client;
 
 import net.migats21.blink.client.BlinkingStarsClient;
+import net.migats21.blink.client.ConfigOptions;
 import net.minecraft.client.renderer.FogRenderer;
 import net.minecraft.util.Mth;
 import org.spongepowered.asm.mixin.Mixin;
@@ -11,6 +12,6 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 public class MixinSkyFog {
     @Redirect(method = "setupColor", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/Mth;cos(F)F", ordinal = 0))
     private static float modifyFogDarkness(float f) {
-        return Mth.cos(f) - (BlinkingStarsClient.cursed && BlinkingStarsClient.cursedSkyDarken ? 0.2f : 0.0f);
+        return Mth.cos(f) - (BlinkingStarsClient.cursed && ConfigOptions.CURSED_SKYDARKEN.get() ? 0.2f : 0.0f);
     }
 }
