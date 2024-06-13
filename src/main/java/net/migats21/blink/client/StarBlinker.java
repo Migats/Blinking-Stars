@@ -12,6 +12,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.util.Mth;
 import org.apache.commons.compress.utils.Lists;
+import org.joml.Vector3f;
 
 import java.util.List;
 
@@ -19,18 +20,16 @@ import java.util.List;
 public class StarBlinker {
     public static final Minecraft minecraft = Minecraft.getInstance();
     private static volatile List<StarBlinker> hardBlinkers;
-    private final double x, y, z;
+    private final Vector3f position;
     private int id = -1, ticks;
     private boolean hasBlinked;
     private static KeyMapping blinkKey;
     public static int timePhase = 0;
-    private final double sensitivity;
+    private final float sensitivity;
 
-    public StarBlinker(int s, double x, double y, double z) {
-        sensitivity = s * 0.001;
-        this.x = x;
-        this.y = y;
-        this.z = z;
+    public StarBlinker(int s, float x, float y, float z) {
+        sensitivity = s * 0.001f;
+        this.position = new Vector3f(x, y, z).normalize(100.0f);
         this.ticks = 0;
         this.hasBlinked = false;
     }
@@ -39,38 +38,39 @@ public class StarBlinker {
         hardBlinkers.removeIf(starBlinker -> !starBlinker.hasBlinked);
     }
 
-    public static double getStarSize(double x, double y, double z, int id) {
+    public static float getStarSize(Vector3f position, int id) {
+        float frameTime = minecraft.getTimer().getGameTimeDeltaPartialTick(false);
         for(StarBlinker starBlinker : hardBlinkers) {
             if (starBlinker.id == id) {
                 starBlinker.hasBlinked = true;
-                return 20.0f - (float)starBlinker.ticks - minecraft.getFrameTime();
+                return 20.0f - (float)starBlinker.ticks - frameTime;
             }
-            if (starBlinker.id == -1 && !starBlinker.hasBlinked && starBlinker.isCloseEnough(x, y, z)) {
+            if (starBlinker.id == -1 && !starBlinker.hasBlinked && starBlinker.isCloseEnough(position)) {
                 starBlinker.id = id;
                 starBlinker.hasBlinked = true;
-                return 20.0f - (float)starBlinker.ticks - minecraft.getFrameTime();
+                return 20.0f - (float)starBlinker.ticks - frameTime;
             }
         }
-        return 0.0;
+        return 0.0f;
     }
 
     public static boolean anyStars() {
         return !hardBlinkers.isEmpty();
     }
 
-    private boolean isCloseEnough(double x, double y, double z) {
-        return Math.abs(x - this.x) < sensitivity && Math.abs(y - this.y) < sensitivity && Math.abs(z - this.z) < sensitivity;
+    private boolean isCloseEnough(Vector3f position) {
+        return position.sub(this.position).lengthSquared() < sensitivity * sensitivity;
     }
 
-    public static void blink(Minecraft minecraft, int s, double angleX, double angleY) {
+    public static void blink(int s, float angleX, float angleY) {
         angleX *= Mth.DEG_TO_RAD;
         angleY *= Mth.DEG_TO_RAD;
         // noinspection DataFlowIssue: Blink can only be called when a singleplayer server is running.
-        double angleZ = minecraft.level.getSunAngle(minecraft.getFrameTime());
-        double x = Math.cos(angleX) * Math.cos(angleY);
-        double y = -Math.sin(angleX);
-        double z = Math.cos(angleX) * Math.sin(angleY);
-        hardBlinkers.add(new StarBlinker(s, x, y * Math.cos(angleZ) + z * Math.sin(angleZ), y * -Math.sin(angleZ) + z * Math.cos(angleZ)));
+        float angleZ = minecraft.level.getSunAngle(minecraft.getTimer().getGameTimeDeltaPartialTick(false));
+        float x = Mth.cos(angleX) * Mth.cos(angleY);
+        float y = -Mth.sin(angleX);
+        float z = Mth.cos(angleX) * Mth.sin(angleY);
+        hardBlinkers.add(new StarBlinker(s, x, y * Mth.cos(angleZ) + z * Mth.sin(angleZ), y * -Mth.sin(angleZ) + z * Mth.cos(angleZ)));
     }
 
     public static void init() {
@@ -82,10 +82,10 @@ public class StarBlinker {
             float angleX = minecraft.getCameraEntity().getXRot();
             float angleY = minecraft.getCameraEntity().getYRot();
             int blinkSensitivity = ConfigOptions.BLINK_SENSITIVITY.get();
-            blink(minecraft, blinkSensitivity, angleX, angleY);
+            blink(blinkSensitivity, angleX, angleY);
             if (!BlinkingStarsClient.isOnServer) return;
             BiStarBlinkPacket packet = new BiStarBlinkPacket((byte)blinkSensitivity, angleX, angleY);
-            packet.sendPayload(ClientPlayNetworking.getSender());
+            ClientPlayNetworking.getSender().sendPacket(packet);
         });
         blinkKey = KeyBindingHelper.registerKeyBinding(new KeyMapping("key.blink.star", InputConstants.Type.KEYSYM, -1, "key.categories.misc"));
     }
@@ -96,7 +96,7 @@ public class StarBlinker {
 
     public static float getSoftBlink(int sb) {
         if (sb > timePhase && sb < timePhase + 5) {
-            return (5.0f + timePhase + minecraft.getFrameTime() - sb)*0.1f;
+            return (5.0f + timePhase + minecraft.getTimer().getGameTimeDeltaPartialTick(false) - sb)*0.1f;
         }
         return 0.0f;
     }

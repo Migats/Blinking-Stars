@@ -4,6 +4,7 @@ import net.fabricmc.fabric.api.networking.v1.PacketSender;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.migats21.blink.network.ClientboundFallingStarPacket;
 import net.migats21.blink.network.ClientboundSolarCursePacket;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -19,7 +20,7 @@ public class ServerSavedData extends SavedData {
     public int nextFallingStar;
     public ServerLevel level;
 
-    private ServerSavedData(CompoundTag compoundTag) {
+    private ServerSavedData(CompoundTag compoundTag, HolderLookup.Provider provider) {
         cursed = compoundTag.getBoolean("cursed");
         nextFallingStar = compoundTag.getInt("nextFallingStar");
     }
@@ -37,7 +38,7 @@ public class ServerSavedData extends SavedData {
     }
 
     public static void syncCurse(PacketSender sender, ServerLevel level) {
-        new ClientboundSolarCursePacket(getSavedData(level).isCursed()).sendPayload(sender);
+        sender.sendPacket(new ClientboundSolarCursePacket(getSavedData(level).isCursed()));
     }
 
     public boolean isCursed() {
@@ -47,11 +48,11 @@ public class ServerSavedData extends SavedData {
     public void setCursed(boolean b) {
         cursed = b;
         ClientboundSolarCursePacket packet = new ClientboundSolarCursePacket(cursed);
-        level.players().forEach((player) -> packet.sendPayload(ServerPlayNetworking.getSender(player)));
+        level.players().forEach((player) -> ServerPlayNetworking.getSender(player).sendPacket(packet));
     }
 
     @Override
-    public CompoundTag save(CompoundTag compoundTag) {
+    public CompoundTag save(CompoundTag compoundTag, HolderLookup.Provider provider) {
         compoundTag.putBoolean("cursed", cursed);
         compoundTag.putInt("nextFallingStar", nextFallingStar);
         return compoundTag;
@@ -61,9 +62,9 @@ public class ServerSavedData extends SavedData {
         nextFallingStar--;
         if (nextFallingStar <= 0) {
             rerollFallingStars();
-            ClientboundFallingStarPacket fallingStarPacket = new ClientboundFallingStarPacket(RANDOM.nextFloat() * 2.0f - 1.0f, RANDOM.nextFloat() * 2.0f - 1.0f, RANDOM.nextFloat() * 2.0f - 1.0f, 0.1f + RANDOM.nextFloat() * 0.1f, RANDOM.nextDouble() * Mth.PI * 2.0);
+            ClientboundFallingStarPacket packet = new ClientboundFallingStarPacket(RANDOM.nextFloat() * 2.0f - 1.0f, RANDOM.nextFloat() * 2.0f - 1.0f, RANDOM.nextFloat() * 2.0f - 1.0f, 0.1f + RANDOM.nextFloat() * 0.1f, RANDOM.nextFloat() * Mth.PI * 2.0f);
             for (ServerPlayer player : level.players()) {
-                fallingStarPacket.sendPayload(ServerPlayNetworking.getSender(player));
+                ServerPlayNetworking.getSender(player).sendPacket(packet);
             }
         }
     }

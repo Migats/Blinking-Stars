@@ -5,7 +5,6 @@ import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.entity.event.v1.EntitySleepEvents;
 import net.fabricmc.fabric.api.entity.event.v1.ServerEntityWorldChangeEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
-import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.migats21.blink.common.ModGameRules;
@@ -14,7 +13,6 @@ import net.migats21.blink.common.command.BlinkCommand;
 import net.migats21.blink.common.command.CurseCommand;
 import net.migats21.blink.network.ClientboundSolarCursePacket;
 import net.migats21.blink.network.PacketHandler;
-import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.InteractionResult;
 
 public class BlinkingStars implements ModInitializer {
@@ -29,9 +27,7 @@ public class BlinkingStars implements ModInitializer {
         );
         ServerEntityWorldChangeEvents.AFTER_PLAYER_CHANGE_WORLD.register((player, level, level2) -> {
             ServerSavedData solarCurseData = ServerSavedData.getSavedData(level2);
-            FriendlyByteBuf buffer = PacketByteBufs.create();
-            buffer.writeBoolean(solarCurseData.isCursed());
-            ServerPlayNetworking.send(player, ClientboundSolarCursePacket.ID, buffer);
+            ServerPlayNetworking.send(player, new ClientboundSolarCursePacket(solarCurseData.isCursed()));
         });
         ServerTickEvents.START_WORLD_TICK.register((level) -> ServerSavedData.getSavedData(level).tick());
         EntitySleepEvents.ALLOW_SLEEP_TIME.register((player, sleepingPos, vanillaResult) -> {

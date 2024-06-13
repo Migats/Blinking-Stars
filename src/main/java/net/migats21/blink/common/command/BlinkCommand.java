@@ -8,7 +8,6 @@ import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.protocol.common.ClientboundCustomPayloadPacket;
 import net.minecraft.server.level.ServerPlayer;
 
 public class BlinkCommand {
@@ -22,7 +21,7 @@ public class BlinkCommand {
             if (!source.getLevel().dimensionType().hasSkyLight()) throw NOT_IN_OVERWORLD.create();
             BiStarBlinkPacket packet = new BiStarBlinkPacket(source.getEntity().getXRot(), source.getEntity().getYRot());
             for (ServerPlayer player : source.getLevel().getPlayers(player -> true)) {
-                packet.sendPayload(ServerPlayNetworking.getSender(player));
+                ServerPlayNetworking.getSender(player).sendPacket(packet);
             }
             return 1;
         }));

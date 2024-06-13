@@ -11,12 +11,8 @@ public class BlinkingStarsClient implements ClientModInitializer {
     public static final Logger LOGGER = LoggerFactory.getLogger(BlinkingStarsClient.class);
     public static boolean cursed = false;
     public static boolean isOnServer = false;
-    public static boolean animatedStars = true;
-    public static boolean coloredStars = true;
     public static boolean shouldUpdateStars = false;
-    public static boolean cursedSkyDarken = true;
-    public static boolean cursedSunColor = true;
-    public static boolean starVariety = true;
+
     @Override
     public void onInitializeClient() {
         PacketHandler.registerClient();
