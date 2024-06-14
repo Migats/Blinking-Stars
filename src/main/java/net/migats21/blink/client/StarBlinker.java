@@ -28,7 +28,7 @@ public class StarBlinker {
     private final float sensitivity;
 
     public StarBlinker(int s, float x, float y, float z) {
-        sensitivity = s * 0.001f;
+        sensitivity = s * 0.1f;
         this.position = new Vector3f(x, y, z).normalize(100.0f);
         this.ticks = 0;
         this.hasBlinked = false;
@@ -59,7 +59,7 @@ public class StarBlinker {
     }
 
     private boolean isCloseEnough(Vector3f position) {
-        return position.sub(this.position).lengthSquared() < sensitivity * sensitivity;
+        return position.sub(this.position, new Vector3f()).lengthSquared() < sensitivity * sensitivity;
     }
 
     public static void blink(int s, float angleX, float angleY) {

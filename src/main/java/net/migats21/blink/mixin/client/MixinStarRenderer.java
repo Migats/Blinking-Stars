@@ -93,7 +93,7 @@ public abstract class MixinStarRenderer {
             float m = Mth.lengthSquared(x, y, z);
             int c = STAR_COLORS[coloredStars ? Math.min(randomSource.nextInt(16), 4) : 4] | (starVariety ? randomSource.nextInt(224) : 224) << 24;
             int b = randomSource.nextInt(1000);
-            if (!(m <= 0.010000001F) && !(m >= 1.0F))
+            if (!(m <= 0.010000001F) && !(m >= 1.0f))
                 this.drawStar(bufferBuilder, randomSource, new Vector3f(x, y, z).normalize(100.0f), w, b, c, i);
         }
 
@@ -123,16 +123,17 @@ public abstract class MixinStarRenderer {
             c = c & 16777215 | o << 24;
         }
         if (b > 0.0f) {
-            b+=1.0f;
-            // TODO: Fix issue with blinking stars.
-            bufferBuilder.addVertex(new Vector3f(w, -w, 0.0f).rotate(rotation).add(position)).setColor(c);
-            bufferBuilder.addVertex(new Vector3f(w*b, w*b, 0.0f).rotate(rotation).add(position)).setColor(c);
-            bufferBuilder.addVertex(new Vector3f(-w, w, 0.0f).rotate(rotation).add(position)).setColor(c);
-            bufferBuilder.addVertex(new Vector3f(-w*b, -w*b, 0.0f).rotate(rotation).add(position)).setColor(c);
-            bufferBuilder.addVertex(new Vector3f(w*b, -w*b, 0.0f).rotate(rotation).add(position)).setColor(c);
+            b += 1.0f;
+
+            bufferBuilder.addVertex(new Vector3f(w * b, -w * b, 0.0f).rotate(rotation).add(position)).setColor(c);
             bufferBuilder.addVertex(new Vector3f(w, w, 0.0f).rotate(rotation).add(position)).setColor(c);
-            bufferBuilder.addVertex(new Vector3f(-w*b, w*b, 0.0f).rotate(rotation).add(position)).setColor(c);
+            bufferBuilder.addVertex(new Vector3f(-w * b, w * b, 0.0f).rotate(rotation).add(position)).setColor(c);
             bufferBuilder.addVertex(new Vector3f(-w, -w, 0.0f).rotate(rotation).add(position)).setColor(c);
+
+            bufferBuilder.addVertex(new Vector3f(w, -w, 0.0f).rotate(rotation).add(position)).setColor(c);
+            bufferBuilder.addVertex(new Vector3f(w * b, w * b, 0.0f).rotate(rotation).add(position)).setColor(c);
+            bufferBuilder.addVertex(new Vector3f(-w, w, 0.0f).rotate(rotation).add(position)).setColor(c);
+            bufferBuilder.addVertex(new Vector3f(-w * b, -w * b, 0.0f).rotate(rotation).add(position)).setColor(c);
         } else {
             bufferBuilder.addVertex(new Vector3f(w, -w, 0.0f).rotate(rotation).add(position)).setColor(c);
             bufferBuilder.addVertex(new Vector3f(w, w, 0.0f).rotate(rotation).add(position)).setColor(c);
