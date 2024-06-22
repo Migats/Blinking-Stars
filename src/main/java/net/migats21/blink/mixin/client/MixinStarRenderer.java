@@ -97,7 +97,7 @@ public abstract class MixinStarRenderer {
                 this.drawStar(bufferBuilder, randomSource, new Vector3f(x, y, z).normalize(100.0f), w, b, c, i);
         }
 
-        this.drawStar(bufferBuilder, null, new Vector3f(100.0f, 0.0f, 0.0f), 0.25f, 0, -1, 16383);
+        this.drawStar(bufferBuilder, null, new Vector3f(-100.0f, 0.0f, 0.0f), 0.25f, 0, -1, 16383);
         StarBlinker.popBlink();
         FallingStar fallingStar = FallingStar.getInstance();
         if (fallingStar != null) {
@@ -143,11 +143,11 @@ public abstract class MixinStarRenderer {
     }
 
     @Unique
-    private void drawFallingStar(BufferBuilder bufferBuilder, Vector3f position, float w, float s, float o, float t, int ii) {
+    private void drawFallingStar(BufferBuilder bufferBuilder, Vector3f position, float w, float s, float o, float t, int c) {
         Quaternionf rotation = (new Quaternionf()).rotateTo(new Vector3f(0.0f, 0.0f, -1.0f), position).rotateZ(s);
-        bufferBuilder.addVertex(new Vector3f(t-w, t-w, 0.0f).rotate(rotation).add(position)).setColor(ii);
-        bufferBuilder.addVertex(new Vector3f(o+w, o-w, 0.0f).rotate(rotation).add(position)).setColor(ii);
-        bufferBuilder.addVertex(new Vector3f(o+w, o+w, 0.0f).rotate(rotation).add(position)).setColor(ii);
-        bufferBuilder.addVertex(new Vector3f(o-w, o+w, 0.0f).rotate(rotation).add(position)).setColor(ii);
+        bufferBuilder.addVertex(new Vector3f(t-w, t-w, 0.0f).rotate(rotation).add(position)).setColor(c);
+        bufferBuilder.addVertex(new Vector3f(o+w, o-w, 0.0f).rotate(rotation).add(position)).setColor(c);
+        bufferBuilder.addVertex(new Vector3f(o+w, o+w, 0.0f).rotate(rotation).add(position)).setColor(c);
+        bufferBuilder.addVertex(new Vector3f(o-w, o+w, 0.0f).rotate(rotation).add(position)).setColor(c);
     }
 }
