@@ -21,7 +21,7 @@ public abstract class MixinMobBurning extends LivingEntity {
     @Inject(method = "isSunBurnTick", at = @At("HEAD"), cancellable = true)
     public void canBurn(CallbackInfoReturnable<Boolean> cir) {
         if (this.level().isClientSide) return;
-        if (this.level().getGameRules().getBoolean(ModGameRules.CURSED_SKY_DARKEN) && ServerSavedData.getSavedData((ServerLevel)this.level()).isCursed()) {
+        if (((ServerLevel) this.level()).getGameRules().getBoolean(ModGameRules.CURSED_SKY_DARKEN) && ServerSavedData.getSavedData((ServerLevel)this.level()).isCursed()) {
             cir.setReturnValue(false);
             cir.cancel();
         }

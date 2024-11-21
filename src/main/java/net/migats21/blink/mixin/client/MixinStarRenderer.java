@@ -4,66 +4,76 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.MeshData;
+import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
+import com.mojang.blaze3d.vertex.VertexBuffer;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import net.migats21.blink.BlinkingStars;
 import net.migats21.blink.client.BlinkingStarsClient;
 import net.migats21.blink.client.ConfigOptions;
 import net.migats21.blink.client.FallingStar;
 import net.migats21.blink.client.StarBlinker;
-import net.minecraft.client.Camera;
-import net.minecraft.client.renderer.GameRenderer;
-import net.minecraft.client.renderer.LevelRenderer;
-import net.minecraft.client.renderer.ShaderInstance;
+import net.minecraft.client.renderer.CompiledShaderProgram;
+import net.minecraft.client.renderer.CoreShaders;
+import net.minecraft.client.renderer.FogParameters;
+import net.minecraft.client.renderer.ShaderProgram;
+import net.minecraft.client.renderer.SkyRenderer;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import org.jetbrains.annotations.Nullable;
-import org.joml.Matrix4f;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.ModifyArgs;
+import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.invoke.arg.Args;
 
-@Mixin(LevelRenderer.class)
+@Mixin(SkyRenderer.class)
 public abstract class MixinStarRenderer {
+    @Shadow private VertexBuffer starBuffer;
+
+    @Shadow protected abstract MeshData drawStars(Tesselator tesselator);
+
+    @Shadow @Final private static ResourceLocation SUN_LOCATION;
     @Unique
     private static final ResourceLocation CURSED_SUN = ResourceLocation.fromNamespaceAndPath(BlinkingStars.MODID, "textures/environment/sun.png");
     @Unique
     private static final int[] STAR_COLORS = {0xffffcc, 0xffccff, 0xffcccc, 0xccffcc, 0xffffff};
 
-    @Shadow protected abstract void createStars();
-
-    @Inject(method = "renderSky", at = @At("HEAD"))
-    private void renderBlinkingStar(Matrix4f matrix4f, Matrix4f matrix4f2, float f, Camera camera, boolean bl, Runnable runnable, CallbackInfo ci) {
-        ShaderInstance shaderInstance;
+    @Inject(method = "renderStars", at = @At("HEAD"))
+    private void renderBlinkingStar(FogParameters fogParameters, float f, PoseStack poseStack, CallbackInfo ci) {
+        CompiledShaderProgram shaderInstance;
         if (ConfigOptions.ANIMATE_STARS.get() || StarBlinker.anyStars() || FallingStar.getInstance() != null) {
             shaderInstance = RenderSystem.getShader();
-            this.createStars();
-            RenderSystem.setShader(() -> shaderInstance);
+            starBuffer.bind();
+            starBuffer.upload(drawStars(Tesselator.getInstance()));
+            VertexBuffer.unbind();
+            RenderSystem.setShader(shaderInstance);
             BlinkingStarsClient.shouldUpdateStars = true;
         } else if (BlinkingStarsClient.shouldUpdateStars) {
             shaderInstance = RenderSystem.getShader();
-            this.createStars();
-            RenderSystem.setShader(() -> shaderInstance);
+            starBuffer.bind();
+            starBuffer.upload(drawStars(Tesselator.getInstance()));
+            VertexBuffer.unbind();
+            RenderSystem.setShader(shaderInstance);
             BlinkingStarsClient.shouldUpdateStars = false;
         }
     }
 
-    @ModifyArg(method = "renderSky", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/systems/RenderSystem;setShaderTexture(ILnet/minecraft/resources/ResourceLocation;)V", ordinal = 0), index = 1)
-    private ResourceLocation changeSunLocation(ResourceLocation normalSun) {
-        return BlinkingStarsClient.cursed && ConfigOptions.CURSED_SUNCOLOR.get() ? CURSED_SUN : normalSun;
+    @Redirect(method = "renderSun", at = @At(value = "FIELD", target = "Lnet/minecraft/client/renderer/SkyRenderer;SUN_LOCATION:Lnet/minecraft/resources/ResourceLocation;"))
+    private ResourceLocation changeSunLocation() {
+        return BlinkingStarsClient.cursed && ConfigOptions.CURSED_SUNCOLOR.get() ? CURSED_SUN : SUN_LOCATION;
     }
 
-    @ModifyArgs(method = "renderSky", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/systems/RenderSystem;setShaderColor(FFFF)V", ordinal = 3))
+    @ModifyArgs(method = "renderStars", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/systems/RenderSystem;setShaderColor(FFFF)V", ordinal = 0))
     private void changeShaderColor(Args args) {
         if (ConfigOptions.STAR_VARIETY.get()) {
             args.set(0, 1.0f);
@@ -72,9 +82,9 @@ public abstract class MixinStarRenderer {
         }
     }
 
-    @ModifyArg(method = "renderSky", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/vertex/VertexBuffer;drawWithShader(Lorg/joml/Matrix4f;Lorg/joml/Matrix4f;Lnet/minecraft/client/renderer/ShaderInstance;)V", ordinal = 1), index = 2)
-    private ShaderInstance changeRenderShader(ShaderInstance posShader) {
-        return GameRenderer.getPositionColorShader();
+    @Redirect(method = "renderStars", at = @At(value = "FIELD", target = "Lnet/minecraft/client/renderer/CoreShaders;POSITION:Lnet/minecraft/client/renderer/ShaderProgram;"))
+    private ShaderProgram changeRenderShader() {
+        return CoreShaders.POSITION_COLOR;
     }
 
     @Inject(method = "drawStars", at = @At("HEAD"), cancellable = true)

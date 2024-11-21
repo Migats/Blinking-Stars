@@ -1,1 +1,2 @@
 accessWidener v1 named
+mutable field net/minecraft/client/renderer/SkyRenderer starBuffer Lcom/mojang/blaze3d/vertex/VertexBuffer;

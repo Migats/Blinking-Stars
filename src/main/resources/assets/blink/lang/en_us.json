@@ -1,10 +1,9 @@
 {
-  "commands.blink.curse.executed": "Solar curse executed",
-  "commands.blink.curse.broken": "Solar curse broken",
   "commands.blink.failed.no_entity": "This command needs to be run by entity",
   "commands.blink.failed.not_in_overworld": "This command can only be run in the overworld",
   "gamerule.cursedSkyDarken": "Monsters on cursed sky darken",
-  "gamerule.fallingStarInterval": "Falling stars frequency",
+  "gamerule.doSolarCurse": "Allow solar curse",
+  "gamerule.fallingStarInterval": "Interval of falling stars",
   "key.blink.star": "Blink star",
   "options.blink": "Blinking Stars Options",
   "options.blink.animate": "Animate Stars",

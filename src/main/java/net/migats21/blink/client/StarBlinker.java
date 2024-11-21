@@ -39,7 +39,7 @@ public class StarBlinker {
     }
 
     public static float getStarSize(Vector3f position, int id) {
-        float frameTime = minecraft.getTimer().getGameTimeDeltaPartialTick(false);
+        float frameTime = minecraft.getDeltaTracker().getGameTimeDeltaPartialTick(false);
         for(StarBlinker starBlinker : hardBlinkers) {
             if (starBlinker.id == id) {
                 starBlinker.hasBlinked = true;
@@ -66,7 +66,7 @@ public class StarBlinker {
         angleX *= Mth.DEG_TO_RAD;
         angleY *= Mth.DEG_TO_RAD;
         // noinspection DataFlowIssue: Blink can only be called when a singleplayer server is running.
-        float angleZ = minecraft.level.getSunAngle(minecraft.getTimer().getGameTimeDeltaPartialTick(false));
+        float angleZ = minecraft.level.getSunAngle(minecraft.getDeltaTracker().getGameTimeDeltaPartialTick(false));
         float x = Mth.cos(angleX) * Mth.cos(angleY);
         float y = -Mth.sin(angleX);
         float z = Mth.cos(angleX) * Mth.sin(angleY);
@@ -96,7 +96,7 @@ public class StarBlinker {
 
     public static float getSoftBlink(int sb) {
         if (sb > timePhase && sb < timePhase + 5) {
-            return (5.0f + timePhase + minecraft.getTimer().getGameTimeDeltaPartialTick(false) - sb)*0.1f;
+            return (5.0f + timePhase + minecraft.getDeltaTracker().getGameTimeDeltaPartialTick(false) - sb)*0.1f;
         }
         return 0.0f;
     }

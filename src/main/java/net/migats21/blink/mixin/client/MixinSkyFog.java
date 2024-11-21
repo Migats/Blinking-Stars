@@ -10,8 +10,8 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 
 @Mixin(FogRenderer.class)
 public class MixinSkyFog {
-    @Redirect(method = "setupColor", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/Mth;cos(F)F", ordinal = 0))
+    @Redirect(method = "computeFogColor", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/Mth;cos(F)F", ordinal = 0))
     private static float modifyFogDarkness(float f) {
-        return Mth.cos(f) - (BlinkingStarsClient.cursed && ConfigOptions.CURSED_SKYDARKEN.get() ? 0.2f : 0.0f);
+        return Mth.cos(f) - (ConfigOptions.CURSED_SKYDARKEN.get() ? BlinkingStarsClient.getCurseProgress() * 0.2f : 0.0f);
     }
 }

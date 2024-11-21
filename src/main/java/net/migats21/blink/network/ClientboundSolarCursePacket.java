@@ -30,6 +30,9 @@ public class ClientboundSolarCursePacket implements ModPacket {
 
     @Override
     public void handle(ClientPlayNetworking.Context context) {
+        if (BlinkingStarsClient.cursed != cursed) {
+            BlinkingStarsClient.curseTick = 50;
+        }
         BlinkingStarsClient.cursed = cursed;
         BlinkingStarsClient.isOnServer = true;
     }

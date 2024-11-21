@@ -45,12 +45,12 @@ public class FallingStar {
     }
 
     public float getOffset() {
-        float frameTime = (float)time + minecraft.getTimer().getGameTimeDeltaPartialTick(false);
+        float frameTime = (float)time + minecraft.getDeltaTracker().getGameTimeDeltaPartialTick(false);
         return (frameTime-5.0f)*20.0f;
     }
 
     public float getTailOffset() {
-        float frameTime = (float)time + minecraft.getTimer().getGameTimeDeltaPartialTick(false);
+        float frameTime = (float)time + minecraft.getDeltaTracker().getGameTimeDeltaPartialTick(false);
         return (frameTime*frameTime*frameTime-500)*0.2f;
     }
 
